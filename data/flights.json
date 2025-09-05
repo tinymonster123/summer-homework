@@ -1,0 +1,26 @@
+[
+  {
+    "flightNumber": "CA1234",
+    "departureCity": "北京",
+    "arrivalCity": "上海",
+    "departureTime": "08:00",
+    "arrivalTime": "10:30",
+    "price": 800,
+    "discount": 0.9,
+    "totalSeats": 180,
+    "availableSeats": 149,
+    "status": "active"
+  },
+  {
+    "flightNumber": "MU5678",
+    "departureCity": "上海",
+    "arrivalCity": "广州",
+    "departureTime": "14:00",
+    "arrivalTime": "16:45",
+    "price": 650,
+    "discount": 0.85,
+    "totalSeats": 160,
+    "availableSeats": 120,
+    "status": "active"
+  }
+]

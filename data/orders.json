@@ -1,0 +1,17 @@
+[
+  {
+    "orderId": "a9ff3de9-220f-494f-b1ff-a884ce41fe3f",
+    "customerId": "customer1",
+    "flightNumber": "CA1234",
+    "passengerCount": 1,
+    "totalPrice": 720,
+    "orderTime": "2025-09-05T13:54:28.614Z",
+    "status": "confirmed",
+    "passengers": [
+      {
+        "name": "lee",
+        "idCard": "123"
+      }
+    ]
+  }
+]
