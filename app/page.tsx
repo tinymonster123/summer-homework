@@ -105,51 +105,53 @@ const FlightSearchTab = () => {
   }, []);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Flight Search & Booking</CardTitle>
-        <CardDescription>Find and book your next flight.</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex space-x-4">
-          <Input placeholder="Flight Number" value={searchQuery.flightNumber} onChange={(e) => setSearchQuery({ ...searchQuery, flightNumber: e.target.value })} />
-          <Input placeholder="Departure City" value={searchQuery.departureCity} onChange={(e) => setSearchQuery({ ...searchQuery, departureCity: e.target.value })} />
-          <Input placeholder="Arrival City" value={searchQuery.arrivalCity} onChange={(e) => setSearchQuery({ ...searchQuery, arrivalCity: e.target.value })} />
-          <Button onClick={handleSearch}>Search</Button>
-        </div>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Flight No.</TableHead>
-              <TableHead>From</TableHead>
-              <TableHead>To</TableHead>
-              <TableHead>Departure</TableHead>
-              <TableHead>Arrival</TableHead>
-              <TableHead>Price</TableHead>
-              <TableHead>Seats</TableHead>
-              <TableHead></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {flights.map((flight) => (
-              <TableRow key={flight.flightNumber}>
-                <TableCell>{flight.flightNumber}</TableCell>
-                <TableCell>{flight.departureCity}</TableCell>
-                <TableCell>{flight.arrivalCity}</TableCell>
-                <TableCell>{flight.departureTime}</TableCell>
-                <TableCell>{flight.arrivalTime}</TableCell>
-                <TableCell>${flight.price}</TableCell>
-                <TableCell>{flight.availableSeats}</TableCell>
-                <TableCell>
-                  <DialogTrigger asChild>
-                    <Button onClick={() => setSelectedFlight(flight)}>Book</Button>
-                  </DialogTrigger>
-                </TableCell>
+    <Dialog>
+      <Card>
+        <CardHeader>
+          <CardTitle>Flight Search & Booking</CardTitle>
+          <CardDescription>Find and book your next flight.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex space-x-4">
+            <Input placeholder="Flight Number" value={searchQuery.flightNumber} onChange={(e) => setSearchQuery({ ...searchQuery, flightNumber: e.target.value })} />
+            <Input placeholder="Departure City" value={searchQuery.departureCity} onChange={(e) => setSearchQuery({ ...searchQuery, departureCity: e.target.value })} />
+            <Input placeholder="Arrival City" value={searchQuery.arrivalCity} onChange={(e) => setSearchQuery({ ...searchQuery, arrivalCity: e.target.value })} />
+            <Button onClick={handleSearch}>Search</Button>
+          </div>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Flight No.</TableHead>
+                <TableHead>From</TableHead>
+                <TableHead>To</TableHead>
+                <TableHead>Departure</TableHead>
+                <TableHead>Arrival</TableHead>
+                <TableHead>Price</TableHead>
+                <TableHead>Seats</TableHead>
+                <TableHead></TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </CardContent>
+            </TableHeader>
+            <TableBody>
+              {flights.map((flight) => (
+                <TableRow key={flight.flightNumber}>
+                  <TableCell>{flight.flightNumber}</TableCell>
+                  <TableCell>{flight.departureCity}</TableCell>
+                  <TableCell>{flight.arrivalCity}</TableCell>
+                  <TableCell>{flight.departureTime}</TableCell>
+                  <TableCell>{flight.arrivalTime}</TableCell>
+                  <TableCell>${flight.price}</TableCell>
+                  <TableCell>{flight.availableSeats}</TableCell>
+                  <TableCell>
+                    <DialogTrigger asChild>
+                      <Button onClick={() => setSelectedFlight(flight)}>Book</Button>
+                    </DialogTrigger>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Book Flight: {selectedFlight?.flightNumber}</DialogTitle>
@@ -167,7 +169,7 @@ const FlightSearchTab = () => {
           <Button onClick={handleBooking}>Confirm Booking</Button>
         </DialogFooter>
       </DialogContent>
-    </Card>
+    </Dialog>
   );
 };
 
@@ -245,6 +247,7 @@ const MyBookingsTab = () => {
 const ManageFlightsTab = () => {
     const [flights, setFlights] = useState<Flight[]>([]);
     const [newFlight, setNewFlight] = useState<Partial<Flight>>({});
+    const [editingFlight, setEditingFlight] = useState<Flight | null>(null);
 
     const fetchFlights = async () => {
         const response = await fetch(`${API_URL}/flights`);
@@ -269,56 +272,128 @@ const ManageFlightsTab = () => {
         }
     };
 
+    const handleUpdateFlight = async () => {
+        if (!editingFlight) return;
+        const { flightNumber, ...updates } = editingFlight;
+        const response = await fetch(`${API_URL}/flights/${flightNumber}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updates),
+        });
+        const result = await response.json();
+        if (result.success) {
+            alert('Flight updated!');
+            setEditingFlight(null);
+            fetchFlights();
+        } else {
+            alert(`Failed to update flight: ${result.message}`);
+        }
+    };
+    
+    const handleEditInputChange = (field: keyof Omit<Flight, 'flightNumber' | 'totalSeats' | 'availableSeats'>, value: string | number) => {
+        if (editingFlight) {
+            setEditingFlight({ ...editingFlight, [field]: value });
+        }
+    };
+
     useEffect(() => {
         fetchFlights();
     }, []);
 
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle>Manage Flights</CardTitle>
-                <CardDescription>Add or modify flight information.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                <div className="flex space-x-2">
-                    <Input placeholder="Flight Number" onChange={(e) => setNewFlight({ ...newFlight, flightNumber: e.target.value })} />
-                    <Input placeholder="From" onChange={(e) => setNewFlight({ ...newFlight, departureCity: e.target.value })} />
-                    <Input placeholder="To" onChange={(e) => setNewFlight({ ...newFlight, arrivalCity: e.target.value })} />
-                    <Input placeholder="Departure Time" onChange={(e) => setNewFlight({ ...newFlight, departureTime: e.target.value })} />
-                    <Input placeholder="Arrival Time" onChange={(e) => setNewFlight({ ...newFlight, arrivalTime: e.target.value })} />
-                    <Input type="number" placeholder="Price" onChange={(e) => setNewFlight({ ...newFlight, price: Number(e.target.value) })} />
-                    <Input type="number" placeholder="Discount" onChange={(e) => setNewFlight({ ...newFlight, discount: Number(e.target.value) })} />
-                    <Input type="number" placeholder="Total Seats" onChange={(e) => setNewFlight({ ...newFlight, totalSeats: Number(e.target.value) })} />
-                    <Button onClick={handleAddFlight}>Add Flight</Button>
-                </div>
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Flight No.</TableHead>
-                            <TableHead>From</TableHead>
-                            <TableHead>To</TableHead>
-                            <TableHead>Price</TableHead>
-                            <TableHead>Total Seats</TableHead>
-                            <TableHead>Available</TableHead>
-                            <TableHead>Status</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {flights.map((flight) => (
-                            <TableRow key={flight.flightNumber}>
-                                <TableCell>{flight.flightNumber}</TableCell>
-                                <TableCell>{flight.departureCity}</TableCell>
-                                <TableCell>{flight.arrivalCity}</TableCell>
-                                <TableCell>${flight.price}</TableCell>
-                                <TableCell>{flight.totalSeats}</TableCell>
-                                <TableCell>{flight.availableSeats}</TableCell>
-                                <TableCell>{flight.status}</TableCell>
+        <Dialog onOpenChange={(open) => !open && setEditingFlight(null)}>
+            <Card>
+                <CardHeader>
+                    <CardTitle>Manage Flights</CardTitle>
+                    <CardDescription>Add or modify flight information.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="flex space-x-2">
+                        <Input placeholder="Flight Number" onChange={(e) => setNewFlight({ ...newFlight, flightNumber: e.target.value })} />
+                        <Input placeholder="From" onChange={(e) => setNewFlight({ ...newFlight, departureCity: e.target.value })} />
+                        <Input placeholder="To" onChange={(e) => setNewFlight({ ...newFlight, arrivalCity: e.target.value })} />
+                        <Input placeholder="Departure Time" onChange={(e) => setNewFlight({ ...newFlight, departureTime: e.target.value })} />
+                        <Input placeholder="Arrival Time" onChange={(e) => setNewFlight({ ...newFlight, arrivalTime: e.target.value })} />
+                        <Input type="number" placeholder="Price" onChange={(e) => setNewFlight({ ...newFlight, price: Number(e.target.value) })} />
+                        <Input type="number" placeholder="Discount" onChange={(e) => setNewFlight({ ...newFlight, discount: Number(e.target.value) })} />
+                        <Input type="number" placeholder="Total Seats" onChange={(e) => setNewFlight({ ...newFlight, totalSeats: Number(e.target.value) })} />
+                        <Button onClick={handleAddFlight}>Add Flight</Button>
+                    </div>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Flight No.</TableHead>
+                                <TableHead>From</TableHead>
+                                <TableHead>To</TableHead>
+                                <TableHead>Price</TableHead>
+                                <TableHead>Total Seats</TableHead>
+                                <TableHead>Available</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead></TableHead>
                             </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </CardContent>
-        </Card>
+                        </TableHeader>
+                        <TableBody>
+                            {flights.map((flight) => (
+                                <TableRow key={flight.flightNumber}>
+                                    <TableCell>{flight.flightNumber}</TableCell>
+                                    <TableCell>{flight.departureCity}</TableCell>
+                                    <TableCell>{flight.arrivalCity}</TableCell>
+                                    <TableCell>${flight.price}</TableCell>
+                                    <TableCell>{flight.totalSeats}</TableCell>
+                                    <TableCell>{flight.availableSeats}</TableCell>
+                                    <TableCell>{flight.status}</TableCell>
+                                    <TableCell>
+                                        <DialogTrigger asChild>
+                                            <Button variant="outline" onClick={() => setEditingFlight(flight)}>Edit</Button>
+                                        </DialogTrigger>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Edit Flight: {editingFlight?.flightNumber}</DialogTitle>
+                </DialogHeader>
+                {editingFlight && (
+                    <div className="grid gap-4 py-4">
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="departureCity" className="text-right">Departure City</Label>
+                            <Input id="departureCity" value={editingFlight.departureCity} onChange={(e) => handleEditInputChange('departureCity', e.target.value)} className="col-span-3" />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="arrivalCity" className="text-right">Arrival City</Label>
+                            <Input id="arrivalCity" value={editingFlight.arrivalCity} onChange={(e) => handleEditInputChange('arrivalCity', e.target.value)} className="col-span-3" />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="departureTime" className="text-right">Departure Time</Label>
+                            <Input id="departureTime" value={editingFlight.departureTime} onChange={(e) => handleEditInputChange('departureTime', e.target.value)} className="col-span-3" />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="arrivalTime" className="text-right">Arrival Time</Label>
+                            <Input id="arrivalTime" value={editingFlight.arrivalTime} onChange={(e) => handleEditInputChange('arrivalTime', e.target.value)} className="col-span-3" />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="price" className="text-right">Price</Label>
+                            <Input id="price" type="number" value={editingFlight.price} onChange={(e) => handleEditInputChange('price', Number(e.target.value))} className="col-span-3" />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="discount" className="text-right">Discount</Label>
+                            <Input id="discount" type="number" value={editingFlight.discount} onChange={(e) => handleEditInputChange('discount', Number(e.target.value))} className="col-span-3" />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="status" className="text-right">Status</Label>
+                            <Input id="status" value={editingFlight.status} onChange={(e) => handleEditInputChange('status', e.target.value)} className="col-span-3" />
+                        </div>
+                    </div>
+                )}
+                <DialogFooter>
+                    <Button onClick={handleUpdateFlight}>Save Changes</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     );
 };
 
@@ -399,28 +474,26 @@ const Home = () => {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Airline Ticket Booking System</h1>
-      <Dialog>
-        <Tabs defaultValue="search">
-          <TabsList>
-            <TabsTrigger value="search">Flight Search & Booking</TabsTrigger>
-            <TabsTrigger value="bookings">My Bookings</TabsTrigger>
-            <TabsTrigger value="flights">Manage Flights</TabsTrigger>
-            <TabsTrigger value="customers">Manage Customers</TabsTrigger>
-          </TabsList>
-          <TabsContent value="search">
-            <FlightSearchTab />
-          </TabsContent>
-          <TabsContent value="bookings">
-            <MyBookingsTab />
-          </TabsContent>
-          <TabsContent value="flights">
-            <ManageFlightsTab />
-          </TabsContent>
-          <TabsContent value="customers">
-            <ManageCustomersTab />
-          </TabsContent>
-        </Tabs>
-      </Dialog>
+      <Tabs defaultValue="search">
+        <TabsList>
+          <TabsTrigger value="search">Flight Search & Booking</TabsTrigger>
+          <TabsTrigger value="bookings">My Bookings</TabsTrigger>
+          <TabsTrigger value="flights">Manage Flights</TabsTrigger>
+          <TabsTrigger value="customers">Manage Customers</TabsTrigger>
+        </TabsList>
+        <TabsContent value="search">
+          <FlightSearchTab />
+        </TabsContent>
+        <TabsContent value="bookings">
+          <MyBookingsTab />
+        </TabsContent>
+        <TabsContent value="flights">
+          <ManageFlightsTab />
+        </TabsContent>
+        <TabsContent value="customers">
+          <ManageCustomersTab />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

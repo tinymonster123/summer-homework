@@ -6,11 +6,30 @@
     "passengerCount": 1,
     "totalPrice": 720,
     "orderTime": "2025-09-05T13:54:28.614Z",
-    "status": "confirmed",
+    "status": "refunded",
     "passengers": [
       {
         "name": "lee",
         "idCard": "123"
+      }
+    ]
+  },
+  {
+    "orderId": "9a8ce9fc-f36f-4aa4-a4d0-2b7bb12c7b42",
+    "customerId": "customer1",
+    "flightNumber": "MU5678",
+    "passengerCount": 2,
+    "totalPrice": 1105,
+    "orderTime": "2025-09-06T00:56:06.914Z",
+    "status": "refunded",
+    "passengers": [
+      {
+        "name": "lee",
+        "idCard": "123"
+      },
+      {
+        "name": "",
+        "idCard": ""
       }
     ]
   }

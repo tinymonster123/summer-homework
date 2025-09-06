@@ -1,14 +1,14 @@
 [
   {
     "flightNumber": "CA1234",
-    "departureCity": "北京",
+    "departureCity": "南昌",
     "arrivalCity": "上海",
     "departureTime": "08:00",
     "arrivalTime": "10:30",
     "price": 800,
     "discount": 0.9,
     "totalSeats": 180,
-    "availableSeats": 149,
+    "availableSeats": 0,
     "status": "active"
   },
   {
@@ -21,6 +21,18 @@
     "discount": 0.85,
     "totalSeats": 160,
     "availableSeats": 120,
+    "status": "active"
+  },
+  {
+    "flightNumber": "123",
+    "departureCity": "南昌",
+    "arrivalCity": "北京",
+    "departureTime": "10:30",
+    "arrivalTime": "12:30",
+    "price": 100,
+    "discount": 0,
+    "totalSeats": 150,
+    "availableSeats": 150,
     "status": "active"
   }
 ]
